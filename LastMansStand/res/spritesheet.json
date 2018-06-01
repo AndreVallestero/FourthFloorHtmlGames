@@ -1,0 +1,174 @@
+{"frames": [
+
+{
+	"filename": "blood.png",
+	"frame": {"x":533,"y":1,"w":132,"h":106},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":106},
+	"sourceSize": {"w":132,"h":106},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "bullet.png",
+	"frame": {"x":1,"y":1,"w":10,"h":14},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":14},
+	"sourceSize": {"w":10,"h":14},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "bulletcase.png",
+	"frame": {"x":35,"y":1,"w":24,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":24},
+	"sourceSize": {"w":24,"h":24},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "crosshair.png",
+	"frame": {"x":13,"y":1,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "ground.png",
+	"frame": {"x":1,"y":109,"w":766,"h":534},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":766,"h":534},
+	"sourceSize": {"w":766,"h":534},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "main0.png",
+	"frame": {"x":1,"y":645,"w":766,"h":534},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":766,"h":534},
+	"sourceSize": {"w":766,"h":534},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "main1.png",
+	"frame": {"x":1,"y":1181,"w":766,"h":534},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":766,"h":534},
+	"sourceSize": {"w":766,"h":534},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "player0.png",
+	"frame": {"x":422,"y":1,"w":35,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":35,"h":52},
+	"sourceSize": {"w":35,"h":52},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "player1.png",
+	"frame": {"x":459,"y":1,"w":35,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":35,"h":52},
+	"sourceSize": {"w":35,"h":52},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "player2.png",
+	"frame": {"x":496,"y":1,"w":35,"h":52},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":35,"h":52},
+	"sourceSize": {"w":35,"h":52},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "sandbag.png",
+	"frame": {"x":61,"y":1,"w":19,"h":25},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":25},
+	"sourceSize": {"w":19,"h":25},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "sandbags.png",
+	"frame": {"x":199,"y":1,"w":134,"h":47},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":134,"h":47},
+	"sourceSize": {"w":134,"h":47},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombierun0.png",
+	"frame": {"x":82,"y":1,"w":37,"h":45},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":45},
+	"sourceSize": {"w":37,"h":45},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombierun1.png",
+	"frame": {"x":121,"y":1,"w":37,"h":45},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":45},
+	"sourceSize": {"w":37,"h":45},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombierun2.png",
+	"frame": {"x":160,"y":1,"w":37,"h":45},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":37,"h":45},
+	"sourceSize": {"w":37,"h":45},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombiewalk0.png",
+	"frame": {"x":335,"y":1,"w":27,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":27,"h":48},
+	"sourceSize": {"w":27,"h":48},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombiewalk1.png",
+	"frame": {"x":364,"y":1,"w":27,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":27,"h":48},
+	"sourceSize": {"w":27,"h":48},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "zombiewalk2.png",
+	"frame": {"x":393,"y":1,"w":27,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":27,"h":48},
+	"sourceSize": {"w":27,"h":48},
+	"pivot": {"x":0.5,"y":0.5}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "spritesheet.png",
+	"format": "RGBA8888",
+	"size": {"w":768,"h":1716},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:07cb12b62b6da34906ef1f575c853c4a:ea40a5df21ac96f14fcadfe2b51d65f1:729adc6043343cfda41c447ce8f464d6$"
+}
+}
