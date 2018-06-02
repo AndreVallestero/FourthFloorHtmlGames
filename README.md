@@ -1,2 +1,2 @@
 # fourth-floor-html-games
-Html ports for games created by FourthFloorGames Game Studio
+Html ports for games created by the indie game studio FourthFloorGames
