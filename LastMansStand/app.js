@@ -4,6 +4,10 @@ Top border is DISP_RATIO
 Right border is 1
 Left border is -1
 Bottom border is -DISP_RATIO
+
+TODO:
+-Use window.OnFocus and window.OnBlur to detect and pause game
+when tab is not focused.
 */
 
 'use strict';
@@ -23,14 +27,13 @@ function main() {
 	spritesheet = new Image();
 	spritesheet.src = "res/spritesheet.png";
 
-	document.addEventListener('keydown',function(event){keyStates[event.keyCode]=1;});
-	document.addEventListener('keyup',function(event){keyStates[event.keyCode]=0;});
-	
 	player = new Player();
 	
 	resize();
 	prevFrameTime = performance.now()/1000;
-	window.addEventListener('resize', resize, false);
+
+	add_event_listeners();
+
 	window.requestAnimationFrame(draw_frame);
 	console.log("Application successfully initialized");
 }
@@ -79,6 +82,14 @@ class Player {
 		}
 		draw_sprite(this.sprites[this.frame], this.posX, this.posY);
 	}
+}
+
+function add_event_listeners() {
+	document.addEventListener('keydown',function(event){keyStates[event.keyCode]=1;});
+	document.addEventListener('keyup',function(event){keyStates[event.keyCode]=0;});
+	window.addEventListener('resize', resize, false);
+	window.onfocus = function() {};
+	window.onblur = function() {};
 }
 
 function draw_frame() {
