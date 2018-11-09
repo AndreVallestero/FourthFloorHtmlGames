@@ -1,25 +1,42 @@
+'use strict';
 /*
-Game uses right hand coordinate system, same as OpenGL
-Top border is DISP_RATIO
-Right border is 1
-Left border is -1
-Bottom border is -DISP_RATIO
+	draw menu,
+	on start, request animation frame
+	run game
+	on lose destroy request animation frame
+	draw lose menu
 
-TODO:
--Use window.OnFocus and window.OnBlur to detect and pause game
-when tab is not focused.
+
+	AI, general physics, special physics, collision, render
+	zombie chooses a random direction in the opposite quadrant and walks there.
 */
 
-'use strict';
 const INV_ROOT_2 = 0.70710678118,
-	DISP_RATIO = 534.0/766.0;
-	
-var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime,
-	invRatio = 383,
-	dispScale = 1,
-	keyStates = new Array(256).fill(0);
+	GAME_DISP_RATIO = 534.0/766.0;
 
-var player;
+var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime,
+	keyStates = new Array(256).fill(0),
+	entities = {
+		"Player":[],
+		"Zombie":[],
+		"Bullet":[],
+		"Sandbags":[],
+		"Supplies":[],
+		"Blood":[]
+	},
+	spritemap = {
+		"blood":[[533,1,132,106]],
+		"bullet":[[1,1,10,14]],
+		"bulletcase":[[35, 1, 24, 24]],
+		"crosshair":[[13,1, 20,20]],
+		"ground":[[1, 109, 766, 534]],
+		"main":[[1, 645, 766, 534],[1, 1181, 766, 534]],
+		"player":[[422,1,35,52],[459,1,35,52],[422,1,35,52],[496,1,35,52]],
+		"sandbag":[[61,1,19,25]],
+		"sandbags":[[199,1,134,47]],
+		"zombierun":[[82,1,37,45],[121,1,37,45],[82,1,37,45],[160,1,37,45]],
+		"zombiewalk":[[335,1,27,48],[364,1,27,48],[335,1,27,48],[393,1,27,48]]
+	};
 
 function main() {
 	canvas = document.getElementById('canvas');
@@ -27,106 +44,153 @@ function main() {
 	spritesheet = new Image();
 	spritesheet.src = "res/spritesheet.png";
 
-	player = new Player();
-	
-	resize();
-	prevFrameTime = performance.now()/1000;
-
 	add_event_listeners();
 
-	window.requestAnimationFrame(draw_frame);
+	resize();
+
+	prevFrameTime = performance.now()/1000;
+	window.requestAnimationFrame(update);
 	console.log("Application successfully initialized");
 }
 
-class Player {
-	constructor() {
-		this.rotation = 0;
-		this.posX = 0;
-		this.posY = 0;
-
-		//screen goes from -1 to 1,
-		//if player moves at 0.5 / second, it will take 4 seconds 
-		//to cross the screen
-		this.speed = 0.5;
-		
-		this.sprites = [[422,1,35,52],[459,1,35,52],[422,1,35,52],[496,1,35,52]];
-		this.state = 0; //0 = standing, 1 = running
-		
-		//inversely proportional frame rate so the faster the player,
-		//the higher the frame rate and makes it look like they're running
-		this.timePerFrame = 1/(this.speed * 16);
-		
-		this.frame = 0;
-		this.nextFrameTime = currFrameTime + this.timePerFrame;
-	}
-	
-	apply_physics() {
-		var motionX = keyStates[68] - keyStates[65]; // left - right
-		var motionY = keyStates[87] - keyStates[83]; // up - down
-		if(motionX && motionY) {	// euclidean geometry
-			motionX *= INV_ROOT_2;
-			motionY *= INV_ROOT_2;
-		}
-		if(motionX || motionY) this.state = 1;
-		else this.state = 0;
-		this.posX += motionX * this.speed * tpl;
-		this.posY += motionY * this.speed * tpl;
-	}
-	
-	draw() {
-		if(!this.nextFrameTime)this.nextFrameTime = currFrameTime;
-		if(currFrameTime >= this.nextFrameTime) {
-			if(this.state) this.frame = (this.frame + 1) % 4; //if running
-			else this.frame = 0; // standing so reset the animation to standing(0)
-			this.nextFrameTime += this.timePerFrame;
-		}
-		draw_sprite(this.sprites[this.frame], this.posX, this.posY);
-	}
-}
-
 function add_event_listeners() {
-	document.addEventListener('keydown',function(event){keyStates[event.keyCode]=1;});
-	document.addEventListener('keyup',function(event){keyStates[event.keyCode]=0;});
+	document.addEventListener('keydown', function(event){keyStates[event.keyCode]=1;});
+	document.addEventListener('keyup', function(event){keyStates[event.keyCodes]=0;});
 	window.addEventListener('resize', resize, false);
 	window.onfocus = function() {};
 	window.onblur = function() {};
 }
 
-function draw_frame() {
-	currFrameTime = performance.now()/1000;
+function resize() {
+	if (window.innerHeight/window.innerWidth > GAME_DISP_RATIO) {
+		canvas.width = Math.ceil(window.innerWidth);
+		canvas.height = Math.ceil(window.innerWidth*GAME_DISP_RATIO);
+	} else {
+		canvas.height = window.innerHeight;
+		canvas.width = window.innerHeight/GAME_DISP_RATIO;
+	}
+
+	invRatio = canvas.height/ (DISP_RATIO + DISP_RATIO);
+	dispScale = canvas.width/766.0;
+}
+
+function update() {
+	console.log("tick");
+	currFrameTime = performance.now()/1000.0;
 	tpl = (currFrameTime - prevFrameTime);
 	prevFrameTime = currFrameTime;
+
+	update_physics();
+	draw_frame();
+
+	window.requestAnimationFrame(update);
+}
+
+function update_physics() {
+	/*
+	for each (var obstacle in sandbags) {
+
+	}
+	for each (var entity in collEntities) {
+		entity.check_collision();
+	}
+	*/
+}
+
+function draw_frame() {
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	
+
 	//temporary border to see resizing
+	context.lineWidth = 10;
+	context.strokeStyle = "#ff00ff";
 	context.rect(0,0,canvas.width,canvas.height);
 	context.stroke(); 
-	
-	player.apply_physics();
-	player.draw();
-	
-	window.requestAnimationFrame(draw_frame);
+}
+
+function draw_entity(entity) {
+
 }
 
 //add rotation, transparency, and draw all objects from their centers
-function draw_sprite(sprite, dx = 0, dy = 0, scale = 1) {
-	dx = (dx + 1) * canvas.width/2
-	dy = (-dy + DISP_RATIO) * invRatio;
-	var dw = sprite[2] * dispScale * scale;
-	var dh = sprite[3] * dispScale * scale;
+function draw_sprite(sprite, dx, dy, dw, dh) {
 	context.drawImage(spritesheet, sprite[0], sprite[1], sprite[2], sprite[3], dx, dy, dw, dh);
 }
 
-function resize() {
-	if (window.innerHeight/window.innerWidth > DISP_RATIO) {
-		canvas.width = Math.ceil(window.innerWidth);
-		canvas.height = Math.ceil(window.innerWidth*DISP_RATIO);
-	} else {
-		canvas.height = window.innerHeight;
-		canvas.width = window.innerHeight/DISP_RATIO;
+class Entity {
+	constructor(width, height, rotation) {
+		this.height = height;
+		this.width = width;
+		this.rotation = rotation || 0.0;
 	}
-	invRatio = canvas.height/ (DISP_RATIO + DISP_RATIO);
-	dispScale = canvas.width/766.0;
+}
+
+class Player extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+		this.xPos = 0;
+		this.yPos = 0;
+		this.speed = 5;
+	}
+
+	check_collision(entity) {
+	}
+
+	collide(entity) {
+	}
+}
+
+class Zombie extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+	}
+
+	collide(entity) {
+
+	}
+}
+
+class Bullet extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+		this.xPos = xPos;
+		this.yPos = yPos;
+		this.speed = 20;
+	}
+
+	// Collides with zombies
+	check_collision(entity) {
+
+	}
+
+	collide(entity) {
+
+	}
+}
+
+class Sandbags extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+	}
+
+	// Collides with zombies
+	check_collision(entity) {
+	}
+}
+
+class Blood extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+	}
+}
+
+class Supplies extends Entity {
+	constructor(width, height, rotation) {
+		super(width, height, rotation);
+	}
+
+	// Collides with player
+	collide(entity) {
+	}
 }
 
 window.onload = main();
