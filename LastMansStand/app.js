@@ -54,7 +54,7 @@ function main() {
 	context = canvas.getContext('2d');
 
 	spritesheet = new Image();
-	// Draw game start menu
+	// Draw start menu
 	spritesheet.onload = function () { draw_bg(spritemap["main"][0]); };
 	spritesheet.src = "res/spritesheet.png";
 
@@ -66,16 +66,15 @@ function main() {
 
 function add_event_listeners() {
 	window.addEventListener('resize', resize);
-	window.onfocus = function () { };
-	window.onblur = function () { };
-	document.addEventListener('keydown', function (event) { keyStates[event.keyCode] = 1; });
-	document.addEventListener('keyup', function (event) { keyStates[event.keyCode] = 0; });
-	document.addEventListener('keypress', key_press);
-	canvas.addEventListener('click', click);
-	canvas.addEventListener('mousemove', function (event) {
+	window.addEventListener('mousemove', function (event) {
 		mousePosX = (event.clientX - canvasOffsetX) / dispScale;
 		mousePosY = (event.clientY - canvasOffsetY) / dispScale;
 	});
+
+	document.addEventListener('keydown', function (event) { keyStates[event.keyCode] = 1; });
+	document.addEventListener('keyup', function (event) { keyStates[event.keyCode] = 0; });
+	document.addEventListener('keypress', key_press);
+	document.addEventListener('click', click);
 }
 
 function resize() {
@@ -94,6 +93,7 @@ function resize() {
 	canvasOffsetX = canvasRect.left;
 	canvasOffsetY = canvasRect.top;
 
+	context.fillStyle = "#00bb00";
 	if (gameState == 0) {
 		draw_bg(spritemap["main"][0]);
 	} else if (gameState == 2) {
@@ -104,14 +104,22 @@ function resize() {
 function key_press(event) {
 	// Start game loop
 	if ((gameState == 0 || gameState == 2) && (event.keyCode == 82 || event.which == 114)) {
-		entities["Player"].push(new Player());
-		gameState = 1;
-		prevFrameTime = performance.now() / 1000;
-		window.requestAnimationFrame(update);
+		start_game();
 	}
 }
 
 function click() {
+	console.log("click");
+}
+
+function start_game() {
+	entities["Player"].push(new Player());
+	gameState = 1;
+
+	context.fillStyle = "#00bb00";
+
+	prevFrameTime = performance.now() / 1000;
+	window.requestAnimationFrame(update);
 }
 
 function update() {
@@ -132,19 +140,15 @@ function update_physics() {
 }
 
 function draw_frame() {
-	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillRect(0, 0, canvas.width, canvas.height);
+
+	draw_bg(spritemap["ground"][0]);
 
 	for (var entityType in entities) {
 		entities[entityType].forEach(function (entity) {
 			entity.draw();
 		});
 	};
-
-	//temporary border to see resizing
-	context.lineWidth = 4;
-	context.strokeStyle = "#ff00ff";
-	context.rect(0, 0, canvas.width, canvas.height);
-	context.stroke();
 }
 
 function draw_bg(sprite) {
@@ -194,8 +198,15 @@ class Player extends Entity {
 		super();
 		this.entityType = "Player";
 		this.sprite = spritemap["player"][0];
-		this.state = 0;
-		this.speed = GAME_DISP_HEIGHT / 2;
+		this.state = 0; // 0 = standing, 1 = running
+		this.speed = GAME_DISP_HEIGHT / 5;
+		this.scale = 0.7
+
+		// Make time for spirte frame inversely proportional to speed
+		//     so faster the player, faster the animation
+		this.timePerSpriteFrame = GAME_DISP_HEIGHT / (this.speed * 24);
+		this.spriteFrameCount = 0;
+		this.nextSpriteFrameTime = currFrameTime + this.timePerSpriteFrame;
 	}
 
 	apply_physics() {
@@ -210,10 +221,10 @@ class Player extends Entity {
 		this.posX += motionX * this.speed * tpl;
 		this.posY += motionY * this.speed * tpl;
 
-		if(this.posX < 0) this.posX = 0
+		if (this.posX < 0) this.posX = 0
 		else if (this.posX >= GAME_DISP_WIDTH) this.posX = GAME_DISP_WIDTH - 1;
 
-		if(this.posY < 0) this.posY = 0;
+		if (this.posY < 0) this.posY = 0;
 		else if (this.posY >= GAME_DISP_HEIGHT) this.posY = GAME_DISP_HEIGHT - 1;
 
 		this.rot = Math.atan((mousePosY - this.posY) / (mousePosX - this.posX));
@@ -221,7 +232,16 @@ class Player extends Entity {
 			this.rot += Math.PI;
 	}
 
-
+	draw() {
+		if (!this.nextSpriteFrameTime) this.nextSpriteFrameTime = currFrameTime;
+		if (currFrameTime >= this.nextSpriteFrameTime) {
+			if (this.state) this.spriteFrameCount = (this.spriteFrameCount + 1) % 4; //if running
+			else this.spriteFrameCount = 0; // standing so reset the animation to standing(0)
+			this.nextSpriteFrameTime = currFrameTime + this.timePerSpriteFrame;
+			this.sprite = spritemap["player"][this.spriteFrameCount];
+		}
+		draw_sprite(this.sprite, this.posX, this.posY, this.rot, this.scale, this.trans);
+	}
 
 	check_collision(entity) {
 	}
@@ -230,6 +250,7 @@ class Player extends Entity {
 	}
 }
 
+/* // None of this is implemented yet
 class Zombie extends Entity {
 	constructor(width, height, rotation) {
 		super(width, height, rotation);
@@ -280,5 +301,5 @@ class Supplies extends Entity {
 	collide(entity) {
 	}
 }
-
+*/
 window.onload = main;
