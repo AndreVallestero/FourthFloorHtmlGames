@@ -204,7 +204,7 @@ class Player extends Entity {
 
 		// Make time for spirte frame inversely proportional to speed
 		//     so faster the player, faster the animation
-		this.timePerSpriteFrame = GAME_DISP_HEIGHT / (this.speed * 24);
+		this.timePerSpriteFrame = GAME_DISP_HEIGHT / (this.speed * 32);
 		this.spriteFrameCount = 0;
 		this.nextSpriteFrameTime = currFrameTime + this.timePerSpriteFrame;
 	}
