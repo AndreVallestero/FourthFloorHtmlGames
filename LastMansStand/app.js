@@ -11,14 +11,19 @@
 
 	TODO: massive memory leak somwhere? wtf is going on drops from 60 to 5 fps
 		after 1 minute
+
+	10-20 ammo given
+	zombies spawn from 0.5s to 2s
 */
 
 const INV_ROOT_2 = 0.70710678118,
 	GAME_DISP_HEIGHT = 534.0,
 	GAME_DISP_WIDTH = 766.0,
-	GAME_DISP_RATIO = GAME_DISP_HEIGHT / GAME_DISP_WIDTH;
+	GAME_DISP_RATIO = GAME_DISP_HEIGHT / GAME_DISP_WIDTH,
+	QS_GAME_DISP_HEIGHT = GAME_DISP_HEIGHT * GAME_DISP_HEIGHT / 16.0; // (GDH/2)^2
 
-var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime,
+
+var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime, nextZombieSpawnTime,
 	canvasOffsetX = 0,
 	canvasOffsetY = 0,
 	mousePosX = 0,
@@ -27,6 +32,7 @@ var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime,
 	gameState = 0, // 0 = Start menu, 1 = In game, 2 = Game over
 	invRatio = GAME_DISP_WIDTH / 2.0,
 	keyStates = new Array(256).fill(0),
+	zombieCap = 64, // Add button in menu to change spawn cap
 	entities = {
 		"Player": [],
 		"Zombie": [],
@@ -114,9 +120,11 @@ function click() {
 
 function start_game() {
 	entities["Player"].push(new Player());
+	// Spawn a zombie in 5 seconds after game starts
+	nextZombieSpawnTime = performance.now() / 1000.0 + 5;
 	gameState = 1;
 
-	context.fillStyle = "#00bb00";
+	context.fillStyle = "#009000";
 
 	prevFrameTime = performance.now() / 1000;
 	window.requestAnimationFrame(update);
@@ -127,10 +135,21 @@ function update() {
 	tpl = (currFrameTime - prevFrameTime);
 	prevFrameTime = currFrameTime;
 
+	try_spawn_zombie();
 	update_physics();
 	draw_frame();
 
 	window.requestAnimationFrame(update);
+}
+
+function try_spawn_zombie() {
+	if (currFrameTime >= nextZombieSpawnTime && entities["Zombie"].length < zombieCap) {
+		// spawn in packs of 1-3
+		for (var i = 0; i < Math.random() * 3; ++i) {
+			nextZombieSpawnTime = currFrameTime + 0.5 + Math.random() * 1.5; // 0.5 to 2s
+			entities["Zombie"].push(new Zombie());
+		}
+	}
 }
 
 function update_physics() {
@@ -250,15 +269,35 @@ class Player extends Entity {
 	}
 }
 
-/* // None of this is implemented yet
 class Zombie extends Entity {
-	constructor(width, height, rotation) {
-		super(width, height, rotation);
+	constructor() {
+		super();
+		this.sprite = spritemap["zombierun"][0];
+		this.state = 0;
+		this.speed = GAME_DISP_HEIGHT / 5.5;
+		this.scale = 0.7;
+
+		// Spawn in a spot where it can't instantly aggro player
+		do {
+			this.posX = Math.random() * GAME_DISP_WIDTH;
+			this.posY = Math.random() * GAME_DISP_HEIGHT;
+		} while (this.can_aggro_player() != false);
 	}
 
 	collide(entity) {
 	}
+
+	can_aggro_player() {
+		for (var playerIndex in entities["Player"]) {
+			var player = entities["Player"][playerIndex];
+			if (Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2) < QS_GAME_DISP_HEIGHT)
+				return player;
+		}
+		return false;
+	}
 }
+
+/* // None of this is implemented yet
 
 class Bullet extends Entity {
 	constructor(width, height, rotation) {
