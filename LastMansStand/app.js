@@ -21,7 +21,7 @@ const INV_ROOT_2 = 0.70710678118,
 	GAME_DISP_WIDTH = 766.0,
 	GAME_DISP_RATIO = GAME_DISP_HEIGHT / GAME_DISP_WIDTH,
 	QS_GAME_DISP_HEIGHT = GAME_DISP_HEIGHT * GAME_DISP_HEIGHT / 16.0, // (GDH/2)^2
-        BG_COLOR = "#009000";
+	BG_COLOR = "#009000";
 
 var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime, nextZombieSpawnTime,
 	canvasOffsetX = 0,
@@ -146,7 +146,7 @@ function try_spawn_zombie() {
 	if (currFrameTime >= nextZombieSpawnTime && entities["Zombie"].length < zombieCap) {
 		// spawn in packs of 1-3
 		for (var i = 0; i < Math.random() * 3; ++i) {
-			nextZombieSpawnTime = currFrameTime + 0.5 + Math.random() * 1.5; // 0.5 to 2s
+			nextZombieSpawnTime = currFrameTime + 2 + Math.random() * 3;
 			entities["Zombie"].push(new Zombie());
 		}
 	}
@@ -154,6 +154,11 @@ function try_spawn_zombie() {
 
 function update_physics() {
 	entities["Player"].forEach(function (player) {
+		player.apply_physics();
+	})
+
+
+	entities["Zombie"].forEach(function (player) {
 		player.apply_physics();
 	})
 }
@@ -209,6 +214,11 @@ class Entity {
 	// Draw each entity from it's center
 	draw() {
 		draw_sprite(this.sprite, this.posX, this.posY, this.rot, this.scale, this.trans);
+	}
+
+	// Returns true if collides with entity targeted
+	collides_with_entity(entity) {
+
 	}
 }
 
@@ -274,17 +284,63 @@ class Zombie extends Entity {
 		super();
 		this.sprite = spritemap["zombierun"][0];
 		this.state = 0;
-		this.speed = GAME_DISP_HEIGHT / 5.5;
+		this.runSpeed = GAME_DISP_HEIGHT / 6;
+		this.speed = this.runSpeed / 2.0; // Non aggro speed is half run speed
 		this.scale = 0.7;
 
 		// Spawn in a spot where it can't instantly aggro player
 		do {
 			this.posX = Math.random() * GAME_DISP_WIDTH;
 			this.posY = Math.random() * GAME_DISP_HEIGHT;
-		} while (this.can_aggro_player() != false);
+		} while (this.can_aggro_player() != null);
+
+
+		this.targetPosX = this.posX;
+		this.targetPosY = this.posY;
+		this.targetAngle = 0;
+		this.nextRetargetTime = Number.MAX_SAFE_INTEGER;
 	}
 
 	collide(entity) {
+	}
+
+	apply_physics() {
+		if (this.update_target_loc()) {
+			this.posX += Math.cos(this.targetAngle) * this.speed * tpl;
+			this.posY += Math.sin(this.targetAngle) * this.speed * tpl;
+		}
+	}
+
+	update_target_loc() {
+		var targetPlayer = this.can_aggro_player();
+		if (targetPlayer != null) {
+			this.targetPosX = targetPlayer.posX;
+			this.targetPosY = targetPlayer.posY;
+			this.speed = this.runSpeed;
+			// Arrived at location
+		} else if (Math.abs(this.posX - this.targetPosX) < 8
+			&& Math.round(this.posY - this.targetPosY) < 8) {
+			if (this.nextRetargetTime <= currFrameTime) {
+				this.nextRetargetTime = Number.MAX_SAFE_INTEGER;
+
+				this.targetPosX = Math.random() * GAME_DISP_WIDTH;
+				this.targetPosY = Math.random() * GAME_DISP_HEIGHT;
+				this.speed = this.runSpeed / 2.0;
+				// At target location and time to rest
+			} else {
+				// Just arrived at target location, start rest timer
+				if (this.nextRetargetTime == Number.MAX_SAFE_INTEGER)
+					this.nextRetargetTime = currFrameTime + 2 + Math.random() * 3;
+				return false
+			}
+		}
+
+		this.targetAngle = Math.atan((this.targetPosY - this.posY) / (this.targetPosX - this.posX));
+		if (this.targetPosX - this.posX < 0)
+			this.targetAngle += Math.PI;
+		this.rot = this.targetAngle;
+
+		return true;
 	}
 
 	can_aggro_player() {
@@ -293,7 +349,7 @@ class Zombie extends Entity {
 			if (Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2) < QS_GAME_DISP_HEIGHT)
 				return player;
 		}
-		return false;
+		return null;
 	}
 }
 
