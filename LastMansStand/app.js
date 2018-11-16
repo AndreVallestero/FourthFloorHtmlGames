@@ -20,8 +20,8 @@ const INV_ROOT_2 = 0.70710678118,
 	GAME_DISP_HEIGHT = 534.0,
 	GAME_DISP_WIDTH = 766.0,
 	GAME_DISP_RATIO = GAME_DISP_HEIGHT / GAME_DISP_WIDTH,
-	QS_GAME_DISP_HEIGHT = GAME_DISP_HEIGHT * GAME_DISP_HEIGHT / 16.0; // (GDH/2)^2
-
+	QS_GAME_DISP_HEIGHT = GAME_DISP_HEIGHT * GAME_DISP_HEIGHT / 16.0, // (GDH/2)^2
+        BG_COLOR = "#009000";
 
 var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime, nextZombieSpawnTime,
 	canvasOffsetX = 0,
@@ -99,7 +99,7 @@ function resize() {
 	canvasOffsetX = canvasRect.left;
 	canvasOffsetY = canvasRect.top;
 
-	context.fillStyle = "#00bb00";
+	context.fillStyle = BG_COLOR;
 	if (gameState == 0) {
 		draw_bg(spritemap["main"][0]);
 	} else if (gameState == 2) {
@@ -124,7 +124,7 @@ function start_game() {
 	nextZombieSpawnTime = performance.now() / 1000.0 + 5;
 	gameState = 1;
 
-	context.fillStyle = "#009000";
+	context.fillStyle = BG_COLOR;
 
 	prevFrameTime = performance.now() / 1000;
 	window.requestAnimationFrame(update);
