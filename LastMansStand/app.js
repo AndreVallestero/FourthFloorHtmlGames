@@ -14,6 +14,9 @@
 
 	10-20 ammo given
 	zombies spawn from 0.5s to 2s
+	
+	//TODO Change the the scale of everything on resize so everything only has
+		to be resized once and can be drawn at new native size after.
 */
 
 const INV_ROOT_2 = 0.70710678118,
@@ -33,6 +36,7 @@ var canvas, context, spritesheet, tpl, prevFrameTime, currFrameTime, nextZombieS
 	invRatio = GAME_DISP_WIDTH / 2.0,
 	keyStates = new Array(256).fill(0),
 	zombieCap = 64, // Add button in menu to change spawn cap
+	entityId = 0,
 	entities = {
 		"Player": [],
 		"Zombie": [],
@@ -115,7 +119,8 @@ function key_press(event) {
 }
 
 function click() {
-	console.log("click");
+	if (gameState == 1)
+		entities["Bullet"].push(new Bullet(entities["Player"][0]));
 }
 
 function start_game() {
@@ -125,6 +130,8 @@ function start_game() {
 	gameState = 1;
 
 	context.fillStyle = BG_COLOR;
+
+	console.log("Game started");
 
 	prevFrameTime = performance.now() / 1000;
 	window.requestAnimationFrame(update);
@@ -155,12 +162,15 @@ function try_spawn_zombie() {
 function update_physics() {
 	entities["Player"].forEach(function (player) {
 		player.apply_physics();
-	})
+	});
 
+	entities["Zombie"].forEach(function (zombie) {
+		zombie.apply_physics();
+	});
 
-	entities["Zombie"].forEach(function (player) {
-		player.apply_physics();
-	})
+	entities["Bullet"].forEach(function (bullet) {
+		bullet.apply_physics();
+	});
 }
 
 function draw_frame() {
@@ -202,6 +212,7 @@ function draw_sprite(sprite, posX = 0, posY = 0, rot = 0, scale = 1, trans = 1) 
 
 class Entity {
 	constructor() {
+		this.id = entityId++;
 		this.posX = GAME_DISP_WIDTH / 2.0;
 		this.posY = GAME_DISP_HEIGHT / 2.0;
 		this.rot = 0;
@@ -209,6 +220,20 @@ class Entity {
 		this.trans = 1;
 		this.sprite;
 		this.entityType;
+	}
+
+	delete() {
+		entities[this.constructor.name].splice(entities[this.constructor.name].indexOf(this), 1);
+		delete this;
+		/*
+		entityFamily = entities[this.constructor.name];
+		for (var i; i < entityFamily.length; ++i) {
+			if(entityFamily[i].id == this.id){
+				entityFamily.splice(i, 1);
+				delete this;
+				return;
+			}
+		}*/
 	}
 
 	// Draw each entity from it's center
@@ -294,10 +319,8 @@ class Zombie extends Entity {
 			this.posY = Math.random() * GAME_DISP_HEIGHT;
 		} while (this.can_aggro_player() != null);
 
-
 		this.targetPosX = this.posX;
 		this.targetPosY = this.posY;
-		this.targetAngle = 0;
 		this.nextRetargetTime = Number.MAX_SAFE_INTEGER;
 	}
 
@@ -306,8 +329,8 @@ class Zombie extends Entity {
 
 	apply_physics() {
 		if (this.update_target_loc()) {
-			this.posX += Math.cos(this.targetAngle) * this.speed * tpl;
-			this.posY += Math.sin(this.targetAngle) * this.speed * tpl;
+			this.posX += Math.cos(this.rot) * this.speed * tpl;
+			this.posY += Math.sin(this.rot) * this.speed * tpl;
 		}
 	}
 
@@ -335,10 +358,9 @@ class Zombie extends Entity {
 			}
 		}
 
-		this.targetAngle = Math.atan((this.targetPosY - this.posY) / (this.targetPosX - this.posX));
+		this.rot = Math.atan((this.targetPosY - this.posY) / (this.targetPosX - this.posX));
 		if (this.targetPosX - this.posX < 0)
-			this.targetAngle += Math.PI;
-		this.rot = this.targetAngle;
+			this.rot += Math.PI;
 
 		return true;
 	}
@@ -353,14 +375,16 @@ class Zombie extends Entity {
 	}
 }
 
-/* // None of this is implemented yet
-
 class Bullet extends Entity {
-	constructor(width, height, rotation) {
-		super(width, height, rotation);
-		this.posX = posX;
-		this.posY = posY;
-		this.speed = 20;
+	constructor(player) {
+		super();
+		this.posX = player.posX;
+		this.posY = player.posY;
+		this.speed = GAME_DISP_HEIGHT / 2;
+		this.rot = player.rot + Math.PI / 2;
+		this.direction = this.rot - Math.PI / 2;
+
+		this.sprite = spritemap["bullet"][0];
 	}
 
 	// Collides with zombies
@@ -368,6 +392,15 @@ class Bullet extends Entity {
 	}
 
 	collide(entity) {
+	}
+
+	apply_physics() {
+		this.posX += Math.cos(this.direction) * this.speed * tpl;
+		this.posY += Math.sin(this.direction) * this.speed * tpl;
+
+		if (this.posX < 0 || this.posX >= GAME_DISP_WIDTH ||
+			this.posY < 0 || this.posY >= GAME_DISP_HEIGHT)
+			this.delete();
 	}
 }
 
@@ -396,5 +429,4 @@ class Supplies extends Entity {
 	collide(entity) {
 	}
 }
-*/
 window.onload = main;
