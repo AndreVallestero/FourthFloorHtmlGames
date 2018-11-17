@@ -133,6 +133,15 @@ function start_game() {
 
 	console.log("Game started");
 
+	//testing
+	/*
+	window.setInterval(function() {
+		entities["Zombie"].forEach(function(zombie) {
+			entities["Bullet"].push(new Bullet(zombie));
+		});
+	}, 100);
+	*/
+
 	prevFrameTime = performance.now() / 1000;
 	window.requestAnimationFrame(update);
 }
